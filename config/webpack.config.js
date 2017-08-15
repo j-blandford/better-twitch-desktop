@@ -1,10 +1,10 @@
 const path = require('path');
 const webpack = require('webpack');
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
+//const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
 
 module.exports = {
     entry: {
-        app: './src/index.ts',
+        app: './src/main.ts',
     },
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.jsx'],
@@ -18,13 +18,23 @@ module.exports = {
                 test: /\.tsx?$/,
                 use: 'ts-loader',
                 exclude: /node_modules/
+            },
+            {
+                test: /\.js$/,
+                exclude: /(node_modules|bower_components)/,
+                use: {
+                  loader: 'babel-loader',
+                  options: {
+                    presets: ['env']
+                  }
+                }
             }
         ]
     },
     plugins: [
-        new UglifyJSPlugin({
-            sourceMap: true
-        })
+        // new UglifyJSPlugin({
+        //     sourceMap: true
+        // })
     ],
     output: {
         filename: '[name].js',

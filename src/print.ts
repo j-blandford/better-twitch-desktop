@@ -1,3 +1,3 @@
 export default function printMe() {
-    console.log("LOLcano");
+    console.log("Initialising...");
 }
