@@ -1,6 +1,3 @@
-/// <reference path ="../node_modules/@types/jquery/index.d.ts"/> 
-import * as $ from 'jquery';
-
 import { App } from './app';
 import printMe from './print';
 

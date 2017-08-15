@@ -6,6 +6,8 @@
   "scripts": {
     "build": "webpack --config config/webpack.config.js",
     "watch": "webpack -w --config config/webpack.config.js",
+    "build:prod": "BABEL_ENV=production npm run build",
+    "build:dev": "BABEL_ENV=development npm run build",
     "dev": "concurrently --kill-others \"node server.js\" \"npm run watch\""
   },
   "repository": {
