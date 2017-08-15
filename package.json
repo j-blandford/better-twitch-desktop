@@ -1,0 +1,35 @@
+{
+  "name": "ffz-desktop",
+  "version": "1.0.0",
+  "description": "FrankerFaceZ for Twitch Desktop client",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --config config/webpack.config.js",
+    "watch": "webpack -w --config config/webpack.config.js",
+    "dev": "concurrently --kill-others \"node server.js\" \"npm run watch\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prasoc/ffz-desktop.git"
+  },
+  "keywords": [
+    "twitch",
+    "chat",
+    "ffz",
+    "bttv",
+    "frankerfacez"
+  ],
+  "author": "prasoc",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/prasoc/ffz-desktop/issues"
+  },
+  "homepage": "https://github.com/prasoc/ffz-desktop#readme",
+  "devDependencies": {
+    "concurrently": "^3.5.0",
+    "express": "^4.15.4",
+    "uglifyjs-webpack-plugin": "^0.4.6",
+    "webpack": "^3.5.4",
+    "webpack-dev-server": "^2.7.1"
+  }
+}
