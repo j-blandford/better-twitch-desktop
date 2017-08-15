@@ -26,8 +26,11 @@
   },
   "homepage": "https://github.com/prasoc/ffz-desktop#readme",
   "devDependencies": {
+    "@types/jquery": "^3.2.11",
     "concurrently": "^3.5.0",
     "express": "^4.15.4",
+    "ts-loader": "^2.3.2",
+    "typescript": "^2.4.2",
     "uglifyjs-webpack-plugin": "^0.4.6",
     "webpack": "^3.5.4",
     "webpack-dev-server": "^2.7.1"

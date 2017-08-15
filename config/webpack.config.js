@@ -4,11 +4,21 @@ const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
 
 module.exports = {
     entry: {
-        app: './src/index.js',
+        app: './src/index.ts',
     },
     resolve: {
+        extensions: ['.ts', '.tsx', '.js', '.jsx'],
         modules: [
             "node_modules"
+        ]
+    },
+    module: {
+        rules: [
+            {
+                test: /\.tsx?$/,
+                use: 'ts-loader',
+                exclude: /node_modules/
+            }
         ]
     },
     plugins: [
