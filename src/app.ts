@@ -1,11 +1,13 @@
-/// <reference path ="../node_modules/@types/jquery/index.d.ts"/> 
 import * as $ from 'jquery';
+
 import { BTTV } from './services/bttv';
+import { Emote } from './emote';
 
 export class App {
     isHooked: boolean = false;
     channelName: string;
-    bttvEmotes: Map<string, string>;
+    bttvEmotes: Emote[];
+    bttv: BTTV;
 
     hook(): boolean {
 
@@ -29,13 +31,14 @@ export class App {
 
         console.log("> Viewing channel: " + this.channelName);
 
-        this.bttvEmotes = BTTV.getChannelEmotes(this.channelName);
+        this.bttv.GetBTTVEmotes$(this.channelName).subscribe(value => console.log(value));
     }
 
     constructor() {
         this.isHooked = this.hook();
 
         if(this.isHooked) {
+            this.bttv = new BTTV();
             this.addChatButton();
             this.getChannelInfo();
         }

@@ -42,5 +42,9 @@
     "typescript": "^2.4.2",
     "webpack": "^3.5.4",
     "webpack-dev-server": "^2.7.1"
+  },
+  "dependencies": {
+    "@types/rx": "^4.1.1",
+    "@types/rx-dom": "^7.0.0"
   }
 }
