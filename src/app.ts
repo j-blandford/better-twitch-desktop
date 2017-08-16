@@ -1,3 +1,4 @@
+import * as Rx from 'rxjs-es/Rx';
 import * as $ from 'jquery';
 
 import { BTTV } from './services/bttv';
@@ -8,6 +9,7 @@ export class App {
     channelName: string;
     bttvEmotes: Emote[];
     bttv: BTTV;
+    $chatContainer: JQuery<HTMLElement>;
 
     hook(): boolean {
 
@@ -26,12 +28,31 @@ export class App {
     }
 
     getChannelInfo() {
-        let elem: JQuery<HTMLElement> = $("p[data-a-target='chat__header-channel-name']");
-        this.channelName = elem.text();
+        let $elem: JQuery<HTMLElement> = $("p[data-a-target='chat__header-channel-name']");
+        this.channelName = $elem.text();
 
         console.log("> Viewing channel: " + this.channelName);
 
-        this.bttv.GetBTTVEmotes$(this.channelName).subscribe(value => console.log(value));
+        this.bttv.GetBTTVEmotes$(this.channelName).subscribe(value => {
+            this.bttvEmotes = value;
+        });
+    }
+
+    grabChannelChat() {
+        this.$chatContainer = $(".chat-list");
+
+        // let's set up an Rx producer so we can detect new messages
+        let $channelMessages: JQuery<HTMLElement> = $(".chat-list__lines").children().not("[data-read='true']");
+
+        let messageStream$ = Rx.Observable.interval(50)
+            .switchMap(() => $(".chat-list__lines").children().not("[data-read='true']"))
+            .map(response => $(response))
+            .subscribe((data) => {
+                $channelMessages = data;
+                $channelMessages.attr("data-read", "true");
+
+                console.log(data.find("[data-a-target='chat-message-text']").text()) 
+            });
     }
 
     constructor() {
@@ -41,6 +62,7 @@ export class App {
             this.bttv = new BTTV();
             this.addChatButton();
             this.getChannelInfo();
+            this.grabChannelChat();
         }
     }
 }

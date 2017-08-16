@@ -1,8 +1,7 @@
 import { App } from './app';
-import printMe from './print';
 
 (function () {
-    printMe();
+    console.log("Initialising...");
 
     let MainApp: App = new App();
 
