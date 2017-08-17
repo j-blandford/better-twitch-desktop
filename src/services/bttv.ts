@@ -10,20 +10,33 @@ export interface IBTTVEmote {
     imageType: string;
 }
 
+interface IBTTVRestrictions {
+    channels: string[];
+    games: string[];
+}
+
 // this allows us to cast the emote response
 interface IBTTVEmoteRepsonse {
     status: number;
     urlTemplate: string;
     bots?: String[];
     emotes: IBTTVEmote[];
+    restrictions?: IBTTVRestrictions;
 }
 
 export class BTTV {
     
     readonly API_BASE_URL: string = 'https://api.betterttv.net/2/';
 
-    public GetBTTVEmotes$(channel: string): Rx.Observable<Emote[]> {
-        let url: string = this.API_BASE_URL + 'channels/' + channel;
+    public GetBTTVEmotes$(channel?: string): Rx.Observable<Emote[]> {
+        let url: string = this.API_BASE_URL;
+
+        if(channel !== undefined) {
+            url += 'channels/' + channel;
+        }
+        else {
+            url += 'emotes';
+        }
 
         return Rx.Observable.ajax({
                 url: url,

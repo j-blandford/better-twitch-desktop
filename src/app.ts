@@ -8,9 +8,12 @@ import { Emote } from './emote';
 export class App {
     isHooked: boolean = false;
     channelName: string;
-    bttvEmotes: Emote[];
+    channelBttvEmotes: Emote[];
+    globalBttvEmotes: Emote[];
     bttv: BTTV;
     $chatContainer: JQuery<HTMLElement>;
+
+    bttvEmotes: Emote[];
 
     hook(): boolean {
 
@@ -35,7 +38,10 @@ export class App {
         console.log("> Viewing channel: " + this.channelName);
 
         this.bttv.GetBTTVEmotes$(this.channelName).subscribe(value => {
-            this.bttvEmotes = value;
+            this.channelBttvEmotes = value;
+            console.log("Channel BTTV emotes: ", this.channelBttvEmotes);
+
+            this.grabChannelChat();
         });
     }
 
@@ -48,35 +54,49 @@ export class App {
         // let's set up an Rx producer so we can detect new messages
         let $channelMessages: JQuery<HTMLElement> = $(".chat-list__lines").children().not("[data-parsed='true']");
 
-        let messageStream$ = Rx.Observable.interval(50)
+        if(this.channelBttvEmotes !== null) {
+            this.bttvEmotes = this.globalBttvEmotes.concat(this.channelBttvEmotes);
+
+            let messageStream$ = Rx.Observable.interval(50)
             .switchMap(() => $(".chat-list__lines").children().not("[data-parsed='true']"))
             .map(response => $(response))
             .subscribe((data) => {
                 $channelMessages = data;
 
-                // "$channelMessages" contains our new messages.
-                // now we can parse the new chat message's text
-
+                var context = this;
                 $channelMessages.each(function(i) {
                     let username: string = $(this).find("[data-a-target='chat-message-username']").text();
+                    let $messageStrings: JQuery<HTMLElement> = $(this).find("[data-a-target='chat-message-text']");
 
-                    $(this).find("[data-a-target='chat-message-username']").text("TESTERINO");
+                    if(context.bttvEmotes != undefined) {
+                        $messageStrings.each(function(k, elem) {
+                            let text: string = $(elem).text();
+                            $(elem).html(Util.parseMessage(text, context.bttvEmotes));
+                        });
+                    }
+
+                    //$(this).find("[data-a-target='chat-message-username']").text("TESTERINO");
                 });
 
                 $channelMessages.attr("data-parsed", "true");
 
                 console.log(data.find("[data-a-target='chat-message-text']").text());
             });
+        }
     }
 
     constructor() {
         this.isHooked = this.hook();
+        this.bttv = new BTTV();
+        
+        this.bttv.GetBTTVEmotes$().subscribe(value => {
+            this.globalBttvEmotes = value;
+            console.log("Global BTTV emotes: ", this.globalBttvEmotes);
+        });
 
         if(this.isHooked) {
-            this.bttv = new BTTV();
             this.addChatButton();
             this.getChannelInfo();
-            this.grabChannelChat();
         }
     }
 }
