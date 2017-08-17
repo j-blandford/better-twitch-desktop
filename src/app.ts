@@ -2,6 +2,7 @@ import * as Rx from 'rxjs-es/Rx';
 import * as $ from 'jquery';
 
 import { BTTV } from './services/bttv';
+import { Util } from './services/util';
 import { Emote } from './emote';
 
 export class App {
@@ -41,17 +42,30 @@ export class App {
     grabChannelChat() {
         this.$chatContainer = $(".chat-list");
 
+        Util.addCssRule(".chat-list__lines > div", { display: "none" });
+        Util.addCssRule(".chat-list__lines > div[data-parsed='true']", { display: "block" });
+
         // let's set up an Rx producer so we can detect new messages
-        let $channelMessages: JQuery<HTMLElement> = $(".chat-list__lines").children().not("[data-read='true']");
+        let $channelMessages: JQuery<HTMLElement> = $(".chat-list__lines").children().not("[data-parsed='true']");
 
         let messageStream$ = Rx.Observable.interval(50)
-            .switchMap(() => $(".chat-list__lines").children().not("[data-read='true']"))
+            .switchMap(() => $(".chat-list__lines").children().not("[data-parsed='true']"))
             .map(response => $(response))
             .subscribe((data) => {
                 $channelMessages = data;
-                $channelMessages.attr("data-read", "true");
 
-                console.log(data.find("[data-a-target='chat-message-text']").text()) 
+                // "$channelMessages" contains our new messages.
+                // now we can parse the new chat message's text
+
+                $channelMessages.each(function(i) {
+                    let username: string = $(this).find("[data-a-target='chat-message-username']").text();
+
+                    $(this).find("[data-a-target='chat-message-username']").text("TESTERINO");
+                });
+
+                $channelMessages.attr("data-parsed", "true");
+
+                console.log(data.find("[data-a-target='chat-message-text']").text());
             });
     }
 

@@ -3,7 +3,7 @@ import * as $ from 'jquery';
 
 import { Emote } from '../emote';
 
-interface IBTTVEmote {
+export interface IBTTVEmote {
     id: string;
     channel: string;
     code: string;
