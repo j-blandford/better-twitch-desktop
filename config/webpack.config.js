@@ -4,7 +4,7 @@ const webpack = require('webpack');
 
 module.exports = {
     entry: {
-        app: './src/main.ts',
+        btd: './src/main.ts',
     },
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.jsx'],
@@ -16,7 +16,7 @@ module.exports = {
         rules: [
             {
                 test: /\.tsx?$/,
-                use: 'ts-loader',
+                use: 'awesome-typescript-loader',
                 exclude: /node_modules/
             },
             {
@@ -38,7 +38,7 @@ module.exports = {
     ],
     output: {
         filename: '[name].js',
-        library: 'ffz-desktop',
+        library: 'betterTwitchDesktop',
         libraryTarget: 'umd',
         umdNamedDefine: true,
         path: path.resolve(__dirname, '../build')

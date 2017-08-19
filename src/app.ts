@@ -4,19 +4,22 @@ import * as $ from 'jquery';
 import { BTTV } from './services/bttv';
 import { Util } from './services/util';
 import { Emote } from './emote';
+import { BTDInterface } from './btdinterface';
+import { LocalStorage, ILocalStorage } from './services/localstorage';
 
 export class App {
+    bttv: BTTV;
+    localStorage: ILocalStorage;
+    interface: BTDInterface;
+
+    $chatContainer: JQuery<HTMLElement>;
     isHooked: boolean = false;
     channelName: string;
     channelBttvEmotes: Emote[];
     globalBttvEmotes: Emote[];
-    bttv: BTTV;
-    $chatContainer: JQuery<HTMLElement>;
-
     bttvEmotes: Emote[];
 
     hook(): boolean {
-
         if(document.getElementsByClassName("player-fullscreen-overlay") !== null) {
             console.log("[SUC] Hooked into Twitch interface!");
             return true;
@@ -27,21 +30,31 @@ export class App {
         }
     }
 
-    addChatButton() {
+    async addChatButton() {
         // let element: Element = document.getElementsByClassName("tw-form__icon-group--right")[0];
+        return new Promise((resolve, reject) => {
+            resolve(true);
+        });
     }
 
-    getChannelInfo() {
+    async getChannelInfo() {
         let $elem: JQuery<HTMLElement> = $("p[data-a-target='chat__header-channel-name']");
         this.channelName = $elem.text();
 
         console.log("> Viewing channel: " + this.channelName);
 
-        this.bttv.GetBTTVEmotes$(this.channelName).subscribe(value => {
+        await this.bttv.GetBTTVEmotes$(this.channelName).subscribe(value => {
             this.channelBttvEmotes = value;
             console.log("Channel BTTV emotes: ", this.channelBttvEmotes);
 
             this.grabChannelChat();
+        });
+    }
+
+    async grabBTTVGlobalEmotes() {
+        await this.bttv.GetBTTVEmotes$().subscribe(value => {
+            this.globalBttvEmotes = value;
+            console.log("Global BTTV emotes: ", this.globalBttvEmotes);
         });
     }
 
@@ -57,7 +70,7 @@ export class App {
         if(this.channelBttvEmotes !== null) {
             this.bttvEmotes = this.globalBttvEmotes.concat(this.channelBttvEmotes);
 
-            let messageStream$ = Rx.Observable.interval(50)
+            Rx.Observable.interval(50)
             .switchMap(() => $(".chat-list__lines").children().not("[data-parsed='true']"))
             .map(response => $(response))
             .subscribe((data) => {
@@ -74,30 +87,40 @@ export class App {
                             $(elem).html(Util.parseMessage(text, context.bttvEmotes));
                         });
                     }
-
-                    //$(this).find("[data-a-target='chat-message-username']").text("TESTERINO");
                 });
 
-                $channelMessages.attr("data-parsed", "true");
 
-                console.log(data.find("[data-a-target='chat-message-text']").text());
+                $channelMessages.attr("data-parsed", "true");
             });
+        }
+    }
+
+    setupLocalStorage() {
+        if(window.localStorage["btd:installed"] == undefined) {
+            window.localStorage["btd:installed"] = true;
+            window.localStorage["btd:show-deleted"] = true;
+        }
+    }
+
+    async initialize() {
+        await this.grabBTTVGlobalEmotes();
+
+        if(this.isHooked) {
+            await this.addChatButton();
+            await this.getChannelInfo();
         }
     }
 
     constructor() {
         this.isHooked = this.hook();
         this.bttv = new BTTV();
-        
-        this.bttv.GetBTTVEmotes$().subscribe(value => {
-            this.globalBttvEmotes = value;
-            console.log("Global BTTV emotes: ", this.globalBttvEmotes);
-        });
+        this.localStorage = new LocalStorage();
 
-        if(this.isHooked) {
-            this.addChatButton();
-            this.getChannelInfo();
-        }
+        this.interface = new BTDInterface();
+        this.interface.hook();
+
+        this.setupLocalStorage();
+        this.initialize();
     }
 }
 

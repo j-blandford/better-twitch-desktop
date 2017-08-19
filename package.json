@@ -1,7 +1,7 @@
 {
-  "name": "ffz-desktop",
+  "name": "better-twitch-desktop",
   "version": "1.0.0",
-  "description": "FrankerFaceZ for Twitch Desktop client",
+  "description": "More features for the Twitch Desktop client (such as BTTV and FFZ emotes)",
   "main": "index.js",
   "scripts": {
     "build": "webpack --config config/webpack.config.js",
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/prasoc/ffz-desktop.git"
+    "url": "git+https://github.com/prasoc/better-twitch-desktop.git"
   },
   "keywords": [
     "twitch",
@@ -24,11 +24,12 @@
   "author": "prasoc",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/prasoc/ffz-desktop/issues"
+    "url": "https://github.com/prasoc/better-twitch-desktop/issues"
   },
-  "homepage": "https://github.com/prasoc/ffz-desktop#readme",
+  "homepage": "https://github.com/prasoc/better-twitch-desktop#readme",
   "devDependencies": {
     "@types/jquery": "^3.2.11",
+    "awesome-typescript-loader": "^3.2.3",
     "babel-cli": "^6.24.1",
     "babel-core": "^6.25.0",
     "babel-loader": "^7.1.1",
@@ -38,12 +39,8 @@
     "babel-preset-minify": "^0.2.0",
     "concurrently": "^3.5.0",
     "express": "^4.15.4",
-    "ts-loader": "^2.3.2",
     "typescript": "^2.4.2",
     "webpack": "^3.5.4",
     "webpack-dev-server": "^2.7.1"
-  },
-  "dependencies": {
-    "@types/rx": "^4.1.1"
   }
 }
