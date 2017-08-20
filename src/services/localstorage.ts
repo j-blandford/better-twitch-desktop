@@ -2,7 +2,7 @@ import { Emote } from '../emote';
 
 export interface ILocalStorage {
     get(key: string): string;
-    set(key: string, value: string): void;
+    set(key: string, value: any): void;
     delete(key: string): void;
     exists(key: string): boolean;
 }
@@ -12,7 +12,7 @@ export class LocalStorage implements ILocalStorage {
         return window.localStorage[key];
     }
 
-    set(key: string, value: string) {
+    set(key: string, value: any) {
          window.localStorage[key] = value;
     }
     

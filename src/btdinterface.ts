@@ -85,9 +85,9 @@ export class BTDInterface {
     }
 
     toggleEmoteMenu() {
-        $("#btd-emotes-container").css("display", this.isEmoteMenuOpen ? "block" : "none");
-
         this.isEmoteMenuOpen = !this.isEmoteMenuOpen;  
+
+        $("#btd-emotes-container").css("display", this.isEmoteMenuOpen ? "block" : "none");        
     }
 
     addEmotes(emoteArray: Emote[]) {

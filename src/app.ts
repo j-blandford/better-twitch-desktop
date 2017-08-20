@@ -98,9 +98,9 @@ export class App {
     }
 
     setupLocalStorage() {
-        if(window.localStorage["btd:installed"] == undefined) {
-            window.localStorage["btd:installed"] = true;
-            window.localStorage["btd:show-deleted"] = true;
+        if(this.localStorage.exists("btd:installed")) {
+            this.localStorage.set("btd:installed", true);
+            this.localStorage.set("btd:show-deleted", true);
         }
     }
 
@@ -111,6 +111,28 @@ export class App {
             await this.addChatButton();
             await this.getChannelInfo();
         }
+    }
+    
+    listenForEvents() {
+        this.localStorage.set("btd:last-href", window.location.pathname);
+
+        // This function is used to poll for location changes
+        setInterval(() => {
+            let lastLocation: string = this.localStorage.get("btd:last-href"); 
+            let location: string = window.location.pathname;
+
+            if(location != lastLocation) {
+                console.log("Changed page!");
+                
+                if(location.match("channel") && !lastLocation.match("channel")) {
+                    // we've just navigated to a new channel, we need to hook into the interface now
+                    this.interface.hook();
+                }
+
+                this.localStorage.set("btd:last-href", location);
+            }
+
+        }, 100);
     }
 
     constructor() {
@@ -123,6 +145,8 @@ export class App {
 
         this.setupLocalStorage();
         this.initialize();
+
+        this.listenForEvents();
     }
 }
 

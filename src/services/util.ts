@@ -13,7 +13,7 @@ export class Util {
 
     static parseMessage(message: string, emotes: Emote[]): string {
         emotes.forEach((emoticon) => {
-            message = message.replace(new RegExp("(^|\\s+)" + Util.RegExpEscape(emoticon.matchString) + "(\\s+|$)", "gm")," <img src='" + emoticon.url + "'/>"); //class='emoticon bttv-" + emoticon.id + "' 
+            message = message.replace(new RegExp("(^|\\s+)" + Util.RegExpEscape(emoticon.matchString) + "(?=(\\s|$))", "gm")," <img src='" + emoticon.url + "'/>"); //class='emoticon bttv-" + emoticon.id + "' 
         });
 
         return message;
