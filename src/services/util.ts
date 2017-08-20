@@ -7,9 +7,13 @@ export class Util {
         $("<style>").prop("type", "text/css").html(rule + css_str).appendTo("head");
     }
 
+    static RegExpEscape(s: string): string {
+        return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    }
+
     static parseMessage(message: string, emotes: Emote[]): string {
         emotes.forEach((emoticon) => {
-            message = message.split(emoticon.matchString).join(" <img src='" + emoticon.url + "'/>"); //class='emoticon bttv-" + emoticon.id + "' 
+            message = message.replace(new RegExp("(^|\\s+)" + Util.RegExpEscape(emoticon.matchString) + "(\\s+|$)", "gm")," <img src='" + emoticon.url + "'/>"); //class='emoticon bttv-" + emoticon.id + "' 
         });
 
         return message;
