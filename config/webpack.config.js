@@ -32,9 +32,9 @@ module.exports = {
         ]
     },
     plugins: [
-        // new UglifyJSPlugin({
-        //     sourceMap: true
-        // })
+        new webpack.ProvidePlugin({
+            "React": "react",
+        }),
     ],
     output: {
         filename: '[name].js',

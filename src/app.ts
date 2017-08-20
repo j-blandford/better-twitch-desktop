@@ -21,7 +21,7 @@ export class App {
 
     hook(): boolean {
         if(document.getElementsByClassName("player-fullscreen-overlay") !== null) {
-            console.log("[SUC] Hooked into Twitch interface!");
+            console.log("[BTD] Hooked into Twitch player!");
             return true;
         }
         else {
@@ -58,7 +58,7 @@ export class App {
         });
     }
 
-    grabChannelChat() {
+    async grabChannelChat() {
         this.$chatContainer = $(".chat-list");
 
         Util.addCssRule(".chat-list__lines > div", { display: "none" });
@@ -69,6 +69,8 @@ export class App {
 
         if(this.channelBttvEmotes !== null) {
             this.bttvEmotes = this.globalBttvEmotes.concat(this.channelBttvEmotes);
+
+            this.interface.addEmotes(this.bttvEmotes);
 
             Rx.Observable.interval(50)
             .switchMap(() => $(".chat-list__lines").children().not("[data-parsed='true']"))
