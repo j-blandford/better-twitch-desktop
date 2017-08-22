@@ -109,6 +109,10 @@ export class BTDInterface {
             .appendTo($("#btd-emotes"));
         })
     }
+    
+    clearEmotes() {
+        
+    }
 } 
 
 export * from './btdinterface';

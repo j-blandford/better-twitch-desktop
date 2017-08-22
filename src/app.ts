@@ -2,6 +2,7 @@ import * as Rx from 'rxjs-es/Rx';
 import * as $ from 'jquery';
 
 import { BTTV } from './services/bttv';
+import { FFZ } from './services/ffz';
 import { Util } from './services/util';
 import { Emote } from './emote';
 import { BTDInterface } from './btdinterface';
@@ -9,6 +10,7 @@ import { LocalStorage, ILocalStorage } from './services/localstorage';
 
 export class App {
     bttv: BTTV;
+    ffz: FFZ;
     localStorage: ILocalStorage;
     interface: BTDInterface;
 
@@ -137,6 +139,8 @@ export class App {
         this.isHooked = this.hook();
         
         this.bttv = new BTTV();
+        this.ffz = new FFZ();
+
         this.localStorage = new LocalStorage();
         this.interface = new BTDInterface();
 

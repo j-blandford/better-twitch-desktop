@@ -28,7 +28,7 @@ export class BTTV {
     
     readonly API_BASE_URL: string = 'https://api.betterttv.net/2/';
 
-    public async GetBTTVEmotes(channel?: string): Promise<Emote[]> {
+    public async GetEmotes(channel?: string): Promise<Emote[]> {
         let url: string = this.API_BASE_URL;
 
         if(channel !== undefined) {
@@ -50,7 +50,11 @@ export class BTTV {
                 let templateUrl: string = 'http:' + json.urlTemplate.replace(/\{\{image\}\}/, "1x");
 
                 json.emotes.forEach((emoticon) => {
-                    result.push({id: emoticon.id, matchString: emoticon.code, url: templateUrl.replace(/\{\{id\}\}/, emoticon.id)});
+                    result.push({
+                        id: emoticon.id, 
+                        matchString: emoticon.code, 
+                        url: templateUrl.replace(/\{\{id\}\}/, emoticon.id)
+                    });
                 });
 
                 return result;
