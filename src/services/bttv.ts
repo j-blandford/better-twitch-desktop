@@ -28,7 +28,7 @@ export class BTTV {
     
     readonly API_BASE_URL: string = 'https://api.betterttv.net/2/';
 
-    public GetBTTVEmotes$(channel?: string): Rx.Observable<Emote[]> {
+    public async GetBTTVEmotes(channel?: string): Promise<Emote[]> {
         let url: string = this.API_BASE_URL;
 
         if(channel !== undefined) {
@@ -54,7 +54,8 @@ export class BTTV {
                 });
 
                 return result;
-            });
+            })
+            .toPromise();
     }
     
     getChannelEmotes(channel: string) : Emote[] {

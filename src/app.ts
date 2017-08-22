@@ -43,19 +43,17 @@ export class App {
 
         console.log("> Viewing channel: " + this.channelName);
 
-        await this.bttv.GetBTTVEmotes$(this.channelName).subscribe(value => {
-            this.channelBttvEmotes = value;
-            console.log("Channel BTTV emotes: ", this.channelBttvEmotes);
+        this.channelBttvEmotes = await this.bttv.GetBTTVEmotes(this.channelName);
 
-            this.grabChannelChat();
-        });
+        console.log("Channel BTTV emotes: ", this.channelBttvEmotes);
+
+        this.grabChannelChat();
     }
 
     async grabBTTVGlobalEmotes() {
-        await this.bttv.GetBTTVEmotes$().subscribe(value => {
-            this.globalBttvEmotes = value;
-            console.log("Global BTTV emotes: ", this.globalBttvEmotes);
-        });
+        this.globalBttvEmotes = await this.bttv.GetBTTVEmotes();
+
+        console.log("Global BTTV emotes: ", this.globalBttvEmotes);
     }
 
     async grabChannelChat() {
@@ -108,7 +106,7 @@ export class App {
         await this.grabBTTVGlobalEmotes();
 
         if(this.isHooked) {
-            await this.addChatButton();
+        //    await this.addChatButton();
             await this.getChannelInfo();
         }
     }
