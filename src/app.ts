@@ -137,10 +137,11 @@ export class App {
 
     constructor() {
         this.isHooked = this.hook();
+        
         this.bttv = new BTTV();
         this.localStorage = new LocalStorage();
-
         this.interface = new BTDInterface();
+
         this.interface.hook();
 
         this.setupLocalStorage();

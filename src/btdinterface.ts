@@ -92,15 +92,20 @@ export class BTDInterface {
 
     addEmotes(emoteArray: Emote[]) {
         emoteArray.forEach((emote) => {
-            let $newEmote = $("<div/>", {"class": "emote-picker__emote"}).append(`
-            <div class="tw-tooltip-wrapper inline-flex">
-                <button class="flex align-items-center justify-content-center emote-picker__emote-link" name="${emote.matchString}" data-a-target="${emote.matchString}">
-                    <figure class="emote-picker__emote-figure">
-                        <img src="${emote.url}" alt="${emote.matchString}">
-                    </figure>
-                </button>
-                <div class="tw-tooltip tw-tooltip--down tw-tooltip--align-center">${emote.matchString}</div>
-            </div>`)
+            let $newEmote = 
+                $("<div/>", {"class": "emote-picker__emote"})
+                .append($("<div/>", {"class": "tw-tooltip-wrapper inline-flex"})
+                    .append($("<button/>", {
+                        "class": "flex align-items-center justify-content-center emote-picker__emote-link",
+                        "name": emote.matchString,
+                        "data-a-target": emote.matchString})
+                        .append($("<figure/>", {"class": "emote-picker__emote-figure"})
+                            .append($("<img/>", {
+                                "src": emote.url, 
+                                "alt": emote.matchString
+                            }))))
+                    .append($("<div/>", {"class": "tw-tooltip tw-tooltip--down tw-tooltip--align-center"})
+                        .text(emote.matchString)))
             .appendTo($("#btd-emotes"));
         })
     }
