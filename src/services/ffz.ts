@@ -44,7 +44,7 @@ interface IFFZEmoteResponse {
 
 export class FFZ {
 
-    readonly API_BASE_URL: string = 'https://api.frankerfacez.com/v1/';
+    readonly API_BASE_URL: string = 'https://cors-anywhere.herokuapp.com/https://api.frankerfacez.com/v1/';
 
     public async GetEmotes(channel?: string): Promise<Emote[]> {
         let url: string = this.API_BASE_URL;

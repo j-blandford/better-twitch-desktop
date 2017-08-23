@@ -17,9 +17,14 @@ export class App {
     $chatContainer: JQuery<HTMLElement>;
     isHooked: boolean = false;
     channelName: string;
+
     channelBttvEmotes: Emote[];
     globalBttvEmotes: Emote[];
     bttvEmotes: Emote[];
+
+    channelFfzEmotes: Emote[];
+    globalFfzEmotes: Emote[];
+    ffzEmotes: Emote[];
 
     hook(): boolean {
         if(document.getElementsByClassName("player-fullscreen-overlay") !== null) {
@@ -45,17 +50,25 @@ export class App {
 
         console.log("> Viewing channel: " + this.channelName);
 
-        this.channelBttvEmotes = await this.bttv.GetBTTVEmotes(this.channelName);
-
+        this.channelBttvEmotes = await this.bttv.GetEmotes(this.channelName);
         console.log("Channel BTTV emotes: ", this.channelBttvEmotes);
+
+        this.channelFfzEmotes = await this.ffz.GetEmotes(this.channelName);
+        console.log("Channel FFZ emotes: ", this.channelFfzEmotes);
 
         this.grabChannelChat();
     }
 
     async grabBTTVGlobalEmotes() {
-        this.globalBttvEmotes = await this.bttv.GetBTTVEmotes();
+        this.globalBttvEmotes = await this.bttv.GetEmotes();
 
         console.log("Global BTTV emotes: ", this.globalBttvEmotes);
+    }
+
+    async grabFFZGlobalEmotes() {
+        this.globalFfzEmotes = await this.ffz.GetEmotes();
+
+        console.log("Global FFZ emotes: ", this.globalFfzEmotes)
     }
 
     async grabChannelChat() {
@@ -67,34 +80,37 @@ export class App {
         // let's set up an Rx producer so we can detect new messages
         let $channelMessages: JQuery<HTMLElement> = $(".chat-list__lines").children().not("[data-parsed='true']");
 
-        if(this.channelBttvEmotes !== null) {
-            this.bttvEmotes = this.globalBttvEmotes.concat(this.channelBttvEmotes);
+        if(this.channelBttvEmotes) this.bttvEmotes = this.globalBttvEmotes.concat(this.channelBttvEmotes);
+        if(this.channelFfzEmotes) this.ffzEmotes = this.globalFfzEmotes.concat(this.channelFfzEmotes);
 
-            this.interface.addEmotes(this.bttvEmotes);
+        this.interface.addBTTVEmotes(this.bttvEmotes);
+        this.interface.addFFZEmotes(this.ffzEmotes);
 
-            Rx.Observable.interval(50)
-            .switchMap(() => $(".chat-list__lines").children().not("[data-parsed='true']"))
-            .map(response => $(response))
-            .subscribe((data) => {
-                $channelMessages = data;
+        let allEmotes: Emote[] = this.bttvEmotes.concat(this.ffzEmotes);
 
-                var context = this;
-                $channelMessages.each(function(i) {
-                    let username: string = $(this).find("[data-a-target='chat-message-username']").text();
-                    let $messageStrings: JQuery<HTMLElement> = $(this).find("[data-a-target='chat-message-text']");
+        Rx.Observable.interval(50)
+        .switchMap(() => $(".chat-list__lines").children().not("[data-parsed='true']"))
+        .map(response => $(response))
+        .subscribe((data) => {
+            $channelMessages = data;
 
-                    if(context.bttvEmotes != undefined) {
-                        $messageStrings.each(function(k, elem) {
-                            let text: string = $(elem).text();
-                            $(elem).html(Util.parseMessage(text, context.bttvEmotes));
-                        });
-                    }
-                });
+            var context = this;
+            $channelMessages.each(function(i) {
+                let username: string = $(this).find("[data-a-target='chat-message-username']").text();
+                let $messageStrings: JQuery<HTMLElement> = $(this).find("[data-a-target='chat-message-text']");
 
-
-                $channelMessages.attr("data-parsed", "true");
+                if(context.bttvEmotes != undefined) {
+                    $messageStrings.each(function(k, elem) {
+                        let text: string = $(elem).text();
+                        $(elem).html(Util.parseMessage(text, allEmotes));
+                    });
+                }
             });
-        }
+
+
+            $channelMessages.attr("data-parsed", "true");
+        });
+    
     }
 
     setupLocalStorage() {
@@ -106,9 +122,9 @@ export class App {
 
     async initialize() {
         await this.grabBTTVGlobalEmotes();
+        await this.grabFFZGlobalEmotes();
 
         if(this.isHooked) {
-        //    await this.addChatButton();
             await this.getChannelInfo();
         }
     }

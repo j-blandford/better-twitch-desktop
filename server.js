@@ -10,7 +10,7 @@ pem.createCertificate({days:1, selfSigned:true}, function(err, keys){
     app.use(express.static('build'));
     
     var httpsServer = https.createServer({key: keys.serviceKey, cert: keys.certificate}, app)
-    .listen(8080, function () {
-        console.log('[HTTPS] Development server started on http://localhost:8080')
+    .listen(10443, function () {
+        console.log('[HTTPS] Development server started on https://localhost:10443')
     });
 });

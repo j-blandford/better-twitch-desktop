@@ -46,7 +46,26 @@ export class BTDInterface {
         Util.addCssRule(".emote-picker__emote", {
             "width": "inherit !important"
         });
-        
+
+        Util.addCssRule(".emote-picker hr", {
+            "border": "#5d5d5d solid 1px",
+            "margin": "14px"
+        });
+
+        // Util.addCssRule("div#btd-bttv-emotes:before", {
+        //     "content": "BTTV EMOTES",
+        //     "display": "block",
+        //     "width": "100%",
+        //     "padding-left": "10px"
+        // });
+
+        // Util.addCssRule("div#btd-ffz-emotes:before", {
+        //     "content": "FFZ EMOTES",
+        //     "display": "block",
+        //     "width": "100%",
+        //     "padding-left": "10px"
+        // });
+
         if($("button[data-a-target='btd-emote-picker-button']").length == 0) {
             $(".chat-input .tw-form__icon-group").append(
                 $("<button/>", {
@@ -77,7 +96,9 @@ export class BTDInterface {
                 .css("display", "none")
                 .append($("<div/>", {"class": "emote-picker__tab-content pd-1"})
                     .append($("<div/>", {"class": "emote-picker__content-block emote-picker__all-tab-content relative pd-t-1 pd-b-2"})
-                        .append($("<div/>", {"id": "btd-emotes","class": "tw-tower justify-content-center tw-tower--gutter-none"})))));
+                        .append($("<div/>", {"id": "btd-bttv-emotes","class": "tw-tower justify-content-center tw-tower--gutter-none"}))
+                        .append($("<hr/>"))
+                        .append($("<div/>", {"id": "btd-ffz-emotes","class": "tw-tower justify-content-center tw-tower--gutter-none"})))));
             
             let $emoteContainer = $("#btd-emotes-container");
         }
@@ -90,7 +111,7 @@ export class BTDInterface {
         $("#btd-emotes-container").css("display", this.isEmoteMenuOpen ? "block" : "none");        
     }
 
-    addEmotes(emoteArray: Emote[]) {
+    private addEmotes(emoteArray: Emote[], isBTTV: boolean) {
         emoteArray.forEach((emote) => {
             let $newEmote = 
                 $("<div/>", {"class": "emote-picker__emote"})
@@ -106,12 +127,20 @@ export class BTDInterface {
                             }))))
                     .append($("<div/>", {"class": "tw-tooltip tw-tooltip--down tw-tooltip--align-center"})
                         .text(emote.matchString)))
-            .appendTo($("#btd-emotes"));
+            .appendTo($(isBTTV ? "#btd-bttv-emotes" : "#btd-ffz-emotes"));
         })
+    }
+
+    addBTTVEmotes(emoteArray: Emote[]) {
+        this.addEmotes(emoteArray, true);
+    }
+
+    addFFZEmotes(emoteArray: Emote[]) {
+        this.addEmotes(emoteArray, false);
     }
     
     clearEmotes() {
-        
+
     }
 } 
 
