@@ -61,7 +61,7 @@ export class FFZ {
                 method: 'GET',
                 responseType: 'json'
             })
-            .map(e => e.response)
+            .map((e: any) => e.response)
             .map((json: IFFZEmoteResponse) => {
                 let result: Array<Emote> = [];
 
@@ -79,7 +79,11 @@ export class FFZ {
                 
                 return result;
             })
-            .toPromise();
+            .toPromise()
+            .catch((e: any) => {
+                console.log("Error grabbing FFZ emotes: ", e);
+                return [];
+            });
     }
 
 }

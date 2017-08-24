@@ -49,17 +49,23 @@ export class BTTV {
 
                 let templateUrl: string = 'http:' + json.urlTemplate.replace(/\{\{image\}\}/, "1x");
 
-                json.emotes.forEach((emoticon) => {
-                    result.push({
-                        id: emoticon.id, 
-                        matchString: emoticon.code, 
-                        url: templateUrl.replace(/\{\{id\}\}/, emoticon.id)
+                if(json !instanceof Error) {
+                    json.emotes.forEach((emoticon) => {
+                        result.push({
+                            id: emoticon.id, 
+                            matchString: emoticon.code, 
+                            url: templateUrl.replace(/\{\{id\}\}/, emoticon.id)
+                        });
                     });
-                });
-
+                }
+    
                 return result;
             })
-            .toPromise();
+            .toPromise()
+            .catch((e: any) => {
+                console.log("Error grabbing BTTV emotes: ", e);
+                return [];
+            });
     }
     
     getChannelEmotes(channel: string) : Emote[] {
