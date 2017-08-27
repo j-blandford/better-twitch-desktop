@@ -5,6 +5,7 @@ import { Util } from './services/util';
 
 export class BTDInterface {
     isEmoteMenuOpen: boolean = false;
+    currentTab: number = 0;
 
     hook() {
             // Give dark usernames a bit of a shadow for contrast
@@ -52,20 +53,6 @@ export class BTDInterface {
             "margin": "14px"
         });
 
-        // Util.addCssRule("div#btd-bttv-emotes:before", {
-        //     "content": "BTTV EMOTES",
-        //     "display": "block",
-        //     "width": "100%",
-        //     "padding-left": "10px"
-        // });
-
-        // Util.addCssRule("div#btd-ffz-emotes:before", {
-        //     "content": "FFZ EMOTES",
-        //     "display": "block",
-        //     "width": "100%",
-        //     "padding-left": "10px"
-        // });
-
         if($("button[data-a-target='btd-emote-picker-button']").length == 0) {
             $(".chat-input .tw-form__icon-group").append(
                 $("<button/>", {
@@ -94,15 +81,66 @@ export class BTDInterface {
                     "data-a-target":"btd-emote-picker"
                 })
                 .css("display", "none")
-                .append($("<div/>", {"class": "emote-picker__tab-content pd-1"})
-                    .append($("<div/>", {"class": "emote-picker__content-block emote-picker__all-tab-content relative pd-t-1 pd-b-2"})
-                        .append($("<div/>", {"id": "btd-bttv-emotes","class": "tw-tower justify-content-center tw-tower--gutter-none"}))
-                        .append($("<hr/>"))
-                        .append($("<div/>", {"id": "btd-ffz-emotes","class": "tw-tower justify-content-center tw-tower--gutter-none"})))));
-            
-            let $emoteContainer = $("#btd-emotes-container");
+                .append($("<div/>", {"id": "btd-tab-container", "class": "emote-picker__tab-content pd-1"})
+                    .append($("<div/>", {"class": "emote-picker__content-block emote-picker__all-tab-content relative pd-t-1 pd-b-2"}))
+                )
+                .append($("<div/>", {"class": "emote-picker__controls-container relative"})
+                    .append($("<div/>", {"id": "btd-emote-tabs", "class": "emote-picker__tabs-container border-t"}))
+                )
+            );
+
+
+            this.addPickerTabs();
         }
-        //$("#emote-picker__channel").insertAfter($("#emote-picker__all"))
+    }
+
+    private addPickerTabs() {
+        this.addTabs();
+
+        let $tabs = $("#btd-emote-tabs");
+        
+        $tabs
+            .empty()
+            .append(this.$newEmoteTab("Emotes"))
+            .append(this.$newEmoteTab("Settings"));
+        
+        $tabs.children().each(() => {
+            $(this).removeClass("emote-picker__tab--active");
+        });
+
+        // first tab is active
+        $tabs.attr("data-active-tab", 0);
+        $tabs.find("div").eq(0).addClass("emote-picker__tab--active"); 
+
+    }
+
+    private $newEmoteTab(tabTitle: string): JQuery<HTMLElement> {
+        let newTabIndex: number = $("#btd-emote-tabs").children().length;
+        
+        return $("<div/>", {"class": "emote-picker__tab pd-x-1"})
+                .attr("data-tab-id", newTabIndex)
+                .click(() => this.switchTabs(newTabIndex))
+                .append("<span/>")
+                    .text(tabTitle);
+    }
+
+    switchTabs(tabIndex: number) {
+        $("div[data-tab-id="+this.currentTab+"]").removeClass("emote-picker__tab--active");
+
+        this.currentTab = tabIndex;
+
+        $("div[data-tab-id="+this.currentTab+"]").addClass("emote-picker__tab--active");
+        
+    }
+
+    private addTabs() {
+        // tab 0 => emote picker
+        $("#btd-tab-container")
+                .append($("<div/>", {"class": "emote-picker__content-block emote-picker__all-tab-content relative pd-t-1 pd-b-2"})
+                    .attr("data-tab-index", 0)
+                    .append($("<div/>", {"id": "btd-bttv-emotes","class": "tw-tower justify-content-center tw-tower--gutter-none"}))
+                    .append($("<hr/>"))
+                    .append($("<div/>", {"id": "btd-ffz-emotes","class": "tw-tower justify-content-center tw-tower--gutter-none"})));
     }
 
     toggleEmoteMenu() {
