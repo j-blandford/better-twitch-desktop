@@ -142,7 +142,19 @@ export class App {
                 
                 if(location.match("channel") && !lastLocation.match("channel")) {
                     // we've just navigated to a new channel, we need to hook into the interface now
-                    this.interface.hook();
+                    setTimeout(() => {
+                        this.getChannelInfo()
+                        .then(() => {
+                            this.interface.clearEmotes();
+                            this.interface.hook();
+                            
+                            if(this.channelBttvEmotes) this.bttvEmotes = this.globalBttvEmotes.concat(this.channelBttvEmotes);
+                            if(this.channelFfzEmotes) this.ffzEmotes = this.globalFfzEmotes.concat(this.channelFfzEmotes);
+                    
+                            this.interface.addBTTVEmotes(this.bttvEmotes);
+                            this.interface.addFFZEmotes(this.ffzEmotes);
+                        });
+                    }, 1000);
                 }
 
                 this.localStorage.set("btd:last-href", location);

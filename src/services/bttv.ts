@@ -49,7 +49,7 @@ export class BTTV {
 
                 let templateUrl: string = 'http:' + json.urlTemplate.replace(/\{\{image\}\}/, "1x");
 
-                if(json !instanceof Error) {
+                //if(json !instanceof Error) {
                     json.emotes.forEach((emoticon) => {
                         result.push({
                             id: emoticon.id, 
@@ -57,7 +57,7 @@ export class BTTV {
                             url: templateUrl.replace(/\{\{id\}\}/, emoticon.id)
                         });
                     });
-                }
+                //}
     
                 return result;
             })

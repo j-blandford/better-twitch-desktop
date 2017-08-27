@@ -140,7 +140,8 @@ export class BTDInterface {
     }
     
     clearEmotes() {
-
+        $("#btd-bttv-emotes").empty();
+        $("#btd-ffz-emotes").empty();
     }
 } 
 
