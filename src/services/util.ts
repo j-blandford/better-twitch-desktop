@@ -2,9 +2,13 @@ import * as $ from 'jquery';
 import { Emote } from '../emote';
 
 export class Util {
-    static addCssRule(rule: string, css: any) {
-        let css_str: string = JSON.stringify(css).replace(/"/g, "").replace(/,/g, ";");
+    static addCSSRule(rule: string, css: any) {
+        let css_str: string = JSON.stringify(css, null, "\t").replace(/"/g, "").replace(/,\n/g, ";\n");
         $("<style>").prop("type", "text/css").html(rule + css_str).appendTo("head");
+    }
+
+    static addCSS(css: string) {
+        $("<style>").prop("type", "text/css").html(css).appendTo("head");
     }
 
     static RegExpEscape(s: string): string {

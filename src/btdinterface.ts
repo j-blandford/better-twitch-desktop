@@ -2,14 +2,20 @@ import * as $ from 'jquery';
 
 import { Emote } from './emote';
 import { Util } from './services/util';
+import { LocalStorage, ILocalStorage } from './services/localstorage';
 
 export class BTDInterface {
     isEmoteMenuOpen: boolean = false;
     currentTab: number = 0;
+    localStorage: ILocalStorage;
+
+    constructor(_localStorage: ILocalStorage) {
+        this.localStorage = _localStorage;
+    }
 
     hook() {
             // Give dark usernames a bit of a shadow for contrast
-            Util.addCssRule(".chat-line__message--username", {
+            Util.addCSSRule(".chat-line__message--username", {
                 "text-shadow": "0px 0px 2px rgb(0, 0, 0)"
             });
 
@@ -40,18 +46,36 @@ export class BTDInterface {
     }
 
     emoteMenu() {
-        Util.addCssRule(".emote-picker .pd-b-2", {
-            "padding-bottom": "0rem !important"
-        });
+        Util.addCSS(`
+        .emote-picker .pd-b-2 {
+            padding-bottom: 0rem !important;
+        }
 
-        Util.addCssRule(".emote-picker__emote", {
-            "width": "inherit !important"
-        });
+        .emote-picker__emote {
+            width: inherit !important;
+        }
 
-        Util.addCssRule(".emote-picker hr", {
-            "border": "#5d5d5d solid 1px",
-            "margin": "14px"
-        });
+        .emote-picker hr {
+            border: #5d5d5d solid 1px;
+            margin: 14px;
+        }
+
+        .btd-settings-header {
+            font-weight: bold;
+        }
+
+        .btd-settings-item {
+            width: 100%;
+            height: 30px;
+            line-height: 30px;
+            border-top: 1px ridge #0e0c13;
+            padding: 0 1.5rem !important;
+        }
+
+        div#btd-settings div.btd-settings-item:nth-of-type(2n) {
+            background-color: rgba(255, 255, 255, 0.06);
+        }
+        `);
 
         if($("button[data-a-target='btd-emote-picker-button']").length == 0) {
             $(".chat-input .tw-form__icon-group").append(
@@ -81,9 +105,7 @@ export class BTDInterface {
                     "data-a-target":"btd-emote-picker"
                 })
                 .css("display", "none")
-                .append($("<div/>", {"id": "btd-tab-container", "class": "emote-picker__tab-content pd-1"})
-                    .append($("<div/>", {"class": "emote-picker__content-block emote-picker__all-tab-content relative pd-t-1 pd-b-2"}))
-                )
+                .append($("<div/>", {"id": "btd-tab-container", "class": "emote-picker__tab-content pd-1"}))
                 .append($("<div/>", {"class": "emote-picker__controls-container relative"})
                     .append($("<div/>", {"id": "btd-emote-tabs", "class": "emote-picker__tabs-container border-t"}))
                 )
@@ -125,22 +147,58 @@ export class BTDInterface {
     }
 
     switchTabs(tabIndex: number) {
-        $("div[data-tab-id="+this.currentTab+"]").removeClass("emote-picker__tab--active");
+        $("div.emote-picker__tab[data-tab-id="+this.currentTab+"]").removeClass("emote-picker__tab--active");
+        $("div.emote-picker__all-tab-content[data-tab-id="+this.currentTab+"]").css("display", "none");
 
         this.currentTab = tabIndex;
 
-        $("div[data-tab-id="+this.currentTab+"]").addClass("emote-picker__tab--active");
+        $("div.emote-picker__tab[data-tab-id="+this.currentTab+"]").addClass("emote-picker__tab--active");
+        $("div.emote-picker__all-tab-content[data-tab-id="+this.currentTab+"]").css("display", "inherit");
         
     }
 
+    private $newSettingsItem(title: string, localStorageName: string) {
+        let isSet: boolean = !!this.localStorage.get(localStorageName); 
+
+        console.log("SETTING: ",localStorageName, this.localStorage.get(localStorageName));
+
+        let $elem: JQuery<HTMLElement> = $(`<div class="btd-settings-item">
+            <div style="float: left;">
+                ${title}
+            </div>
+            <div style="float: right;">
+                ${isSet ? "YES" : "NO"}
+            </div>
+        </div>`);
+
+        $elem.click(() => {
+            
+        });
+
+        return $elem;
+    }
+
     private addTabs() {
+        let $tabs = $("#btd-tab-container");
+
         // tab 0 => emote picker
-        $("#btd-tab-container")
-                .append($("<div/>", {"class": "emote-picker__content-block emote-picker__all-tab-content relative pd-t-1 pd-b-2"})
-                    .attr("data-tab-index", 0)
-                    .append($("<div/>", {"id": "btd-bttv-emotes","class": "tw-tower justify-content-center tw-tower--gutter-none"}))
-                    .append($("<hr/>"))
-                    .append($("<div/>", {"id": "btd-ffz-emotes","class": "tw-tower justify-content-center tw-tower--gutter-none"})));
+        $tabs.append($("<div/>", {"class": "emote-picker__content-block emote-picker__all-tab-content relative pd-t-1 pd-b-2"})
+            .attr("data-tab-id", 0)
+            .append($("<div/>", {"id": "btd-bttv-emotes","class": "tw-tower justify-content-center tw-tower--gutter-none"}))
+            .append($("<hr/>"))
+            .append($("<div/>", {"id": "btd-ffz-emotes","class": "tw-tower justify-content-center tw-tower--gutter-none"})));
+
+        // tab 1 => settings menu
+        $tabs.append($("<div/>", {"class": "emote-picker__content-block emote-picker__all-tab-content relative pd-t-1 pd-b-2"})
+            .attr("data-tab-id", 1)
+            .append($("<div/>", {"id": "btd-settings","class": "tw-tower justify-content-center tw-tower--gutter-none"})
+                .append($("<div/>", {"class": "btd-settings-header"})
+                    .text("Better Twitch Desktop v1.0.0"))
+                .append(this.$newSettingsItem("Show Deleted Messages", "btd:show-deleted"))
+                .append(this.$newSettingsItem("Display BTTV global/channel emotes", "btd:show-bttv"))
+                .append(this.$newSettingsItem("Display FFZ global/channel emotes", "btd:show-ffz"))
+            )
+        );
     }
 
     toggleEmoteMenu() {

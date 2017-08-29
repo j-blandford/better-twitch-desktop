@@ -6,7 +6,7 @@ import { FFZ } from './services/ffz';
 import { Util } from './services/util';
 import { Emote } from './emote';
 import { BTDInterface } from './btdinterface';
-import { LocalStorage, ILocalStorage } from './services/localstorage';
+import { CookieStorage, ILocalStorage } from './services/localstorage';
 
 export class App {
     bttv: BTTV;
@@ -18,13 +18,13 @@ export class App {
     isHooked: boolean = false;
     channelName: string;
 
-    channelBttvEmotes: Emote[];
-    globalBttvEmotes: Emote[];
-    bttvEmotes: Emote[];
+    channelBttvEmotes: Emote[]  = [];
+    globalBttvEmotes: Emote[]   = [];
+    bttvEmotes: Emote[]         = [];
 
-    channelFfzEmotes: Emote[];
-    globalFfzEmotes: Emote[];
-    ffzEmotes: Emote[];
+    channelFfzEmotes: Emote[]   = [];
+    globalFfzEmotes: Emote[]    = [];
+    ffzEmotes: Emote[]          = [];
 
     hook(): boolean {
         if(document.getElementsByClassName("player-fullscreen-overlay") !== null) {
@@ -37,51 +37,36 @@ export class App {
         }
     }
 
-    async addChatButton() {
-        // let element: Element = document.getElementsByClassName("tw-form__icon-group--right")[0];
-        return new Promise((resolve, reject) => {
-            resolve(true);
-        });
-    }
-
     async getChannelInfo() {
         let $elem: JQuery<HTMLElement> = $("p[data-a-target='chat__header-channel-name']");
         this.channelName = $elem.text();
 
         console.log("> Viewing channel: " + this.channelName);
 
-        this.channelBttvEmotes = await this.bttv.GetEmotes(this.channelName);
-        console.log("Channel BTTV emotes: ", this.channelBttvEmotes);
+        if(this.localStorage.get("btd:show-bttv")) {
+            this.channelBttvEmotes = await this.bttv.GetEmotes(this.channelName);
+            console.log("Channel BTTV emotes: ", this.channelBttvEmotes);
+        }
 
-        this.channelFfzEmotes = await this.ffz.GetEmotes(this.channelName);
-        console.log("Channel FFZ emotes: ", this.channelFfzEmotes);
+        if(this.localStorage.get("btd:show-ffz")) {
+            this.channelFfzEmotes = await this.ffz.GetEmotes(this.channelName);
+            console.log("Channel FFZ emotes: ", this.channelFfzEmotes);
+        }
 
         this.grabChannelChat();
-    }
-
-    async grabBTTVGlobalEmotes() {
-        this.globalBttvEmotes = await this.bttv.GetEmotes();
-
-        console.log("Global BTTV emotes: ", this.globalBttvEmotes);
-    }
-
-    async grabFFZGlobalEmotes() {
-        this.globalFfzEmotes = await this.ffz.GetEmotes();
-
-        console.log("Global FFZ emotes: ", this.globalFfzEmotes)
     }
 
     async grabChannelChat() {
         this.$chatContainer = $(".chat-list");
 
-        Util.addCssRule(".chat-list__lines > div", { display: "none" });
-        Util.addCssRule(".chat-list__lines > div[data-parsed='true']", { display: "block" });
+        Util.addCSSRule(".chat-list__lines > div", { display: "none" });
+        Util.addCSSRule(".chat-list__lines > div[data-parsed='true']", { display: "block" });
 
         // let's set up an Rx producer so we can detect new messages
         let $channelMessages: JQuery<HTMLElement> = $(".chat-list__lines").children().not("[data-parsed='true']");
 
-        if(this.channelBttvEmotes) this.bttvEmotes = this.globalBttvEmotes.concat(this.channelBttvEmotes);
-        if(this.channelFfzEmotes) this.ffzEmotes = this.globalFfzEmotes.concat(this.channelFfzEmotes);
+        if(this.channelBttvEmotes && this.localStorage.get("btd:show-bttv")) this.bttvEmotes = this.globalBttvEmotes.concat(this.channelBttvEmotes);
+        if(this.channelFfzEmotes && this.localStorage.get("btd:show-ffz")) this.ffzEmotes = this.globalFfzEmotes.concat(this.channelFfzEmotes);
 
         this.interface.addBTTVEmotes(this.bttvEmotes);
         this.interface.addFFZEmotes(this.ffzEmotes);
@@ -112,22 +97,6 @@ export class App {
         });
     
     }
-
-    setupLocalStorage() {
-        if(this.localStorage.exists("btd:installed")) {
-            this.localStorage.set("btd:installed", true);
-            this.localStorage.set("btd:show-deleted", true);
-        }
-    }
-
-    async initialize() {
-        await this.grabBTTVGlobalEmotes();
-        await this.grabFFZGlobalEmotes();
-
-        if(this.isHooked) {
-            await this.getChannelInfo();
-        }
-    }
     
     listenForEvents() {
         this.localStorage.set("btd:last-href", window.location.pathname);
@@ -147,7 +116,7 @@ export class App {
                         .then(() => {
                             this.interface.clearEmotes();
                             this.interface.hook();
-                            
+
                             if(this.channelBttvEmotes) this.bttvEmotes = this.globalBttvEmotes.concat(this.channelBttvEmotes);
                             if(this.channelFfzEmotes) this.ffzEmotes = this.globalFfzEmotes.concat(this.channelFfzEmotes);
                     
@@ -163,14 +132,42 @@ export class App {
         }, 100);
     }
 
+    setupLocalStorage() {
+        if(!this.localStorage.exists("btd:installed")) {
+            this.localStorage.set("btd:installed", true);
+            
+            this.localStorage.set("btd:show-deleted", true);
+            this.localStorage.set("btd:show-bttv", true);
+            this.localStorage.set("btd:show-ffz", true);
+        }
+    }
+
+    async initialize(): Promise<void> {
+        if(this.localStorage.get("btd:show-bttv")) {
+            this.globalBttvEmotes = await this.bttv.GetEmotes();
+
+            console.log("Global BTTV emotes: ", this.globalBttvEmotes);
+        }
+
+        if(this.localStorage.get("btd:show-ffz")) {
+            this.globalFfzEmotes = await this.ffz.GetEmotes();
+
+            console.log("Global FFZ emotes: ", this.globalFfzEmotes);
+        }
+
+        if(this.isHooked) {
+            await this.getChannelInfo();
+        }
+    }
+
     constructor() {
         this.isHooked = this.hook();
         
         this.bttv = new BTTV();
         this.ffz = new FFZ();
 
-        this.localStorage = new LocalStorage();
-        this.interface = new BTDInterface();
+        this.localStorage = new CookieStorage();
+        this.interface = new BTDInterface(this.localStorage);
 
         this.interface.hook();
 
