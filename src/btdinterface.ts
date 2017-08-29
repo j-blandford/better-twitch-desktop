@@ -158,22 +158,41 @@ export class BTDInterface {
     }
 
     private $newSettingsItem(title: string, localStorageName: string) {
-        let isSet: boolean = !!this.localStorage.get(localStorageName); 
+        let isSet: boolean = (this.localStorage.get(localStorageName) == 'true'); 
 
-        console.log("SETTING: ",localStorageName, this.localStorage.get(localStorageName));
+        console.log("SETTING: ",localStorageName, isSet);
 
-        let $elem: JQuery<HTMLElement> = $(`<div class="btd-settings-item">
-            <div style="float: left;">
-                ${title}
-            </div>
-            <div style="float: right;">
-                ${isSet ? "YES" : "NO"}
-            </div>
-        </div>`);
+        // let $elem: JQuery<HTMLElement> = $(`<div class="btd-settings-item">
+        //     <div style="float: left;">
+        //         ${title}
+        //     </div>
+        //     <div style="float: right;">
+        //         <button class="tw-button tw-button-success">
+        //             ${isSet ? "YES" : "NO"}
+        //         </button>
+        //     </div>
+        // </div>`);
 
-        $elem.click(() => {
-            
-        });
+        let $elem: JQuery<HTMLElement> = $("<div/>", {"class": "btd-settings-item"})
+            .append($("<div/>")
+                    .css("float", "left")
+                    .text(title)
+            )
+            .append($("<div/>")
+                    .css("float", "right")
+                .append($("<button/>", {"class": "tw-button"})
+                    .css("float", "right")
+                    .addClass(isSet ? "tw-button--success" : "tw-button--alert")
+                    .text(isSet ? "YES" : "NO")
+                    .click((e) => {
+                        let sVal: boolean = (this.localStorage.get(localStorageName) == 'true'); 
+                        this.localStorage.set(localStorageName, !sVal);
+                        
+                        $(e.currentTarget).toggleClass("tw-button--success tw-button--alert");
+                        $(e.currentTarget).text(sVal ? "NO" : "YES");
+                    })
+                )
+            )
 
         return $elem;
     }

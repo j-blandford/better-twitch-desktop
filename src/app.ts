@@ -43,12 +43,12 @@ export class App {
 
         console.log("> Viewing channel: " + this.channelName);
 
-        if(this.localStorage.get("btd:show-bttv")) {
+        if(this.localStorage.get("btd:show-bttv") == 'true') {
             this.channelBttvEmotes = await this.bttv.GetEmotes(this.channelName);
             console.log("Channel BTTV emotes: ", this.channelBttvEmotes);
         }
 
-        if(this.localStorage.get("btd:show-ffz")) {
+        if(this.localStorage.get("btd:show-ffz") == 'true') {
             this.channelFfzEmotes = await this.ffz.GetEmotes(this.channelName);
             console.log("Channel FFZ emotes: ", this.channelFfzEmotes);
         }
@@ -65,8 +65,8 @@ export class App {
         // let's set up an Rx producer so we can detect new messages
         let $channelMessages: JQuery<HTMLElement> = $(".chat-list__lines").children().not("[data-parsed='true']");
 
-        if(this.channelBttvEmotes && this.localStorage.get("btd:show-bttv")) this.bttvEmotes = this.globalBttvEmotes.concat(this.channelBttvEmotes);
-        if(this.channelFfzEmotes && this.localStorage.get("btd:show-ffz")) this.ffzEmotes = this.globalFfzEmotes.concat(this.channelFfzEmotes);
+        if(this.channelBttvEmotes && this.localStorage.get("btd:show-bttv") == 'true') this.bttvEmotes = this.globalBttvEmotes.concat(this.channelBttvEmotes);
+        if(this.channelFfzEmotes && this.localStorage.get("btd:show-ffz") == 'true') this.ffzEmotes = this.globalFfzEmotes.concat(this.channelFfzEmotes);
 
         this.interface.addBTTVEmotes(this.bttvEmotes);
         this.interface.addFFZEmotes(this.ffzEmotes);
@@ -143,13 +143,13 @@ export class App {
     }
 
     async initialize(): Promise<void> {
-        if(this.localStorage.get("btd:show-bttv")) {
+        if(this.localStorage.get("btd:show-bttv") == 'true') {
             this.globalBttvEmotes = await this.bttv.GetEmotes();
 
             console.log("Global BTTV emotes: ", this.globalBttvEmotes);
         }
 
-        if(this.localStorage.get("btd:show-ffz")) {
+        if(this.localStorage.get("btd:show-ffz") == 'true') {
             this.globalFfzEmotes = await this.ffz.GetEmotes();
 
             console.log("Global FFZ emotes: ", this.globalFfzEmotes);
