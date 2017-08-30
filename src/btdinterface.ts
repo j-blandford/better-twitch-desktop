@@ -75,6 +75,10 @@ export class BTDInterface {
         div#btd-settings div.btd-settings-item:nth-of-type(2n) {
             background-color: rgba(255, 255, 255, 0.06);
         }
+
+        .chat-line__message[data-btd-removed='true'] {
+            color: rgba(255, 255, 255, 0.27);
+        }
         `);
 
         if($("button[data-a-target='btd-emote-picker-button']").length == 0) {
@@ -159,19 +163,6 @@ export class BTDInterface {
 
     private $newSettingsItem(title: string, localStorageName: string) {
         let isSet: boolean = (this.localStorage.get(localStorageName) == 'true'); 
-
-        console.log("SETTING: ",localStorageName, isSet);
-
-        // let $elem: JQuery<HTMLElement> = $(`<div class="btd-settings-item">
-        //     <div style="float: left;">
-        //         ${title}
-        //     </div>
-        //     <div style="float: right;">
-        //         <button class="tw-button tw-button-success">
-        //             ${isSet ? "YES" : "NO"}
-        //         </button>
-        //     </div>
-        // </div>`);
 
         let $elem: JQuery<HTMLElement> = $("<div/>", {"class": "btd-settings-item"})
             .append($("<div/>")

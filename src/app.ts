@@ -60,10 +60,10 @@ export class App {
         this.$chatContainer = $(".chat-list");
 
         Util.addCSSRule(".chat-list__lines > div", { display: "none" });
-        Util.addCSSRule(".chat-list__lines > div[data-parsed='true']", { display: "block" });
+        Util.addCSSRule(".chat-list__lines > div[data-btd-parsed='true']", { display: "block" });
 
         // let's set up an Rx producer so we can detect new messages
-        let $channelMessages: JQuery<HTMLElement> = $(".chat-list__lines").children().not("[data-parsed='true']");
+        let $channelMessages: JQuery<HTMLElement> = $(".chat-list__lines").children().not("[data-btd-parsed='true']");
 
         if(this.channelBttvEmotes && this.localStorage.get("btd:show-bttv") == 'true') this.bttvEmotes = this.globalBttvEmotes.concat(this.channelBttvEmotes);
         if(this.channelFfzEmotes && this.localStorage.get("btd:show-ffz") == 'true') this.ffzEmotes = this.globalFfzEmotes.concat(this.channelFfzEmotes);
@@ -74,7 +74,7 @@ export class App {
         let allEmotes: Emote[] = this.bttvEmotes.concat(this.ffzEmotes);
 
         Rx.Observable.interval(50)
-        .switchMap(() => $(".chat-list__lines").children().not("[data-parsed='true']"))
+        .switchMap(() => $(".chat-list__lines").children().not("[data-btd-parsed='true']"))
         .map(response => $(response))
         .subscribe((data) => {
             $channelMessages = data;
@@ -92,10 +92,53 @@ export class App {
                 }
             });
 
-
-            $channelMessages.attr("data-parsed", "true");
+            $channelMessages.attr("data-btd-html", $channelMessages.html()); // saves the content
+            $channelMessages.attr("data-btd-parsed", "true");
+            $channelMessages.attr("data-btd-deleted", "false");
         });
     
+    }
+
+    private checkLocationChange() {
+        let lastLocation: string = this.localStorage.get("btd:last-href"); 
+        let location: string = window.location.pathname;
+
+        if(location != lastLocation) {
+            console.log("Changed page!");
+            
+            if(location.match("channel") && !lastLocation.match("channel")) {
+                // we've just navigated to a new channel, we need to hook into the interface now
+                setTimeout(() => {
+                    this.getChannelInfo()
+                    .then(() => {
+                        this.interface.clearEmotes();
+                        this.interface.hook();
+
+                        if(this.channelBttvEmotes) this.bttvEmotes = this.globalBttvEmotes.concat(this.channelBttvEmotes);
+                        if(this.channelFfzEmotes) this.ffzEmotes = this.globalFfzEmotes.concat(this.channelFfzEmotes);
+                
+                        this.interface.addBTTVEmotes(this.bttvEmotes);
+                        this.interface.addFFZEmotes(this.ffzEmotes);
+                    });
+                }, 1000);
+            }
+
+            this.localStorage.set("btd:last-href", location);
+        }
+    }
+
+    private checkDeletedMessages() {
+        let $messages: JQuery<HTMLElement> = $(".chat-line__message[data-btd-parsed='true']");
+
+        $messages.each(function(i) {
+            let $elem = $(this);
+            if($elem.children(".chat-line__message--deleted").length > 0) {
+                // message has been deleted
+                // let's restore it
+                $elem.html($messages.attr("data-btd-html"));
+                $elem.attr("data-btd-removed", "true");
+            }
+        });
     }
     
     listenForEvents() {
@@ -103,31 +146,8 @@ export class App {
 
         // This function is used to poll for location changes
         setInterval(() => {
-            let lastLocation: string = this.localStorage.get("btd:last-href"); 
-            let location: string = window.location.pathname;
-
-            if(location != lastLocation) {
-                console.log("Changed page!");
-                
-                if(location.match("channel") && !lastLocation.match("channel")) {
-                    // we've just navigated to a new channel, we need to hook into the interface now
-                    setTimeout(() => {
-                        this.getChannelInfo()
-                        .then(() => {
-                            this.interface.clearEmotes();
-                            this.interface.hook();
-
-                            if(this.channelBttvEmotes) this.bttvEmotes = this.globalBttvEmotes.concat(this.channelBttvEmotes);
-                            if(this.channelFfzEmotes) this.ffzEmotes = this.globalFfzEmotes.concat(this.channelFfzEmotes);
-                    
-                            this.interface.addBTTVEmotes(this.bttvEmotes);
-                            this.interface.addFFZEmotes(this.ffzEmotes);
-                        });
-                    }, 1000);
-                }
-
-                this.localStorage.set("btd:last-href", location);
-            }
+           this.checkLocationChange();
+           this.checkDeletedMessages();
 
         }, 100);
     }
