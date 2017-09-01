@@ -47,7 +47,7 @@ To fix this, we need to allow **all** certificates to run from within the client
 
 #### Instructions
 
-First run `npm i -g asar` to install globally the necessary ASAR extraction and packing tools. Then navigate to the client folder (on my Windows machine it is located at `dddd`). 
+First run `npm i -g asar` to install globally the necessary ASAR extraction and packing tools. Then navigate to the client folder (on my Windows machine it is located at `C:\Users\{{{USERNAME}}}\AppData\Roaming\Twitch`). 
 
 Now you are ready to modify the Twitch client.
 
