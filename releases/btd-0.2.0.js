@@ -13646,12 +13646,9 @@ return jQuery;
 /* unused harmony namespace reexport */
 
 class Util {
-    static addCSSRule(rule, css) {
-        let css_str = JSON.stringify(css, null, "\t").replace(/"/g, "").replace(/,\n/g, ";\n");
+    static addCssRule(rule, css) {
+        let css_str = JSON.stringify(css).replace(/"/g, "").replace(/,/g, ";");
         __WEBPACK_IMPORTED_MODULE_0_jquery__("<style>").prop("type", "text/css").html(rule + css_str).appendTo("head");
-    }
-    static addCSS(css) {
-        __WEBPACK_IMPORTED_MODULE_0_jquery__("<style>").prop("type", "text/css").html(css).appendTo("head");
     }
     static RegExpEscape(s) {
         return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -13701,17 +13698,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 class App {
     constructor() {
         this.isHooked = false;
-        this.channelBttvEmotes = [];
-        this.globalBttvEmotes = [];
-        this.bttvEmotes = [];
-        this.channelFfzEmotes = [];
-        this.globalFfzEmotes = [];
-        this.ffzEmotes = [];
         this.isHooked = this.hook();
         this.bttv = new __WEBPACK_IMPORTED_MODULE_2__services_bttv__["a" /* BTTV */]();
         this.ffz = new __WEBPACK_IMPORTED_MODULE_3__services_ffz__["a" /* FFZ */]();
-        this.localStorage = new __WEBPACK_IMPORTED_MODULE_6__services_localstorage__["a" /* CookieStorage */]();
-        this.interface = new __WEBPACK_IMPORTED_MODULE_5__btdinterface__["a" /* BTDInterface */](this.localStorage);
+        this.localStorage = new __WEBPACK_IMPORTED_MODULE_6__services_localstorage__["a" /* LocalStorage */]();
+        this.interface = new __WEBPACK_IMPORTED_MODULE_5__btdinterface__["a" /* BTDInterface */]();
         this.interface.hook();
         this.setupLocalStorage();
         this.initialize();
@@ -13727,38 +13718,54 @@ class App {
             return false;
         }
     }
+    addChatButton() {
+        return __awaiter(this, void 0, void 0, function* () {
+            // let element: Element = document.getElementsByClassName("tw-form__icon-group--right")[0];
+            return new Promise((resolve, reject) => {
+                resolve(true);
+            });
+        });
+    }
     getChannelInfo() {
         return __awaiter(this, void 0, void 0, function* () {
             let $elem = __WEBPACK_IMPORTED_MODULE_1_jquery__("p[data-a-target='chat__header-channel-name']");
             this.channelName = $elem.text();
             console.log("> Viewing channel: " + this.channelName);
-            if (this.localStorage.get("btd:show-bttv") == 'true') {
-                this.channelBttvEmotes = yield this.bttv.GetEmotes(this.channelName);
-                console.log("Channel BTTV emotes: ", this.channelBttvEmotes);
-            }
-            if (this.localStorage.get("btd:show-ffz") == 'true') {
-                this.channelFfzEmotes = yield this.ffz.GetEmotes(this.channelName);
-                console.log("Channel FFZ emotes: ", this.channelFfzEmotes);
-            }
+            this.channelBttvEmotes = yield this.bttv.GetEmotes(this.channelName);
+            console.log("Channel BTTV emotes: ", this.channelBttvEmotes);
+            this.channelFfzEmotes = yield this.ffz.GetEmotes(this.channelName);
+            console.log("Channel FFZ emotes: ", this.channelFfzEmotes);
             this.grabChannelChat();
+        });
+    }
+    grabBTTVGlobalEmotes() {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.globalBttvEmotes = yield this.bttv.GetEmotes();
+            console.log("Global BTTV emotes: ", this.globalBttvEmotes);
+        });
+    }
+    grabFFZGlobalEmotes() {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.globalFfzEmotes = yield this.ffz.GetEmotes();
+            console.log("Global FFZ emotes: ", this.globalFfzEmotes);
         });
     }
     grabChannelChat() {
         return __awaiter(this, void 0, void 0, function* () {
             this.$chatContainer = __WEBPACK_IMPORTED_MODULE_1_jquery__(".chat-list");
-            __WEBPACK_IMPORTED_MODULE_4__services_util__["a" /* Util */].addCSSRule(".chat-list__lines > div", { display: "none" });
-            __WEBPACK_IMPORTED_MODULE_4__services_util__["a" /* Util */].addCSSRule(".chat-list__lines > div[data-btd-parsed='true']", { display: "block" });
+            __WEBPACK_IMPORTED_MODULE_4__services_util__["a" /* Util */].addCssRule(".chat-list__lines > div", { display: "none" });
+            __WEBPACK_IMPORTED_MODULE_4__services_util__["a" /* Util */].addCssRule(".chat-list__lines > div[data-parsed='true']", { display: "block" });
             // let's set up an Rx producer so we can detect new messages
-            let $channelMessages = __WEBPACK_IMPORTED_MODULE_1_jquery__(".chat-list__lines").children().not("[data-btd-parsed='true']");
-            if (this.channelBttvEmotes && this.localStorage.get("btd:show-bttv") == 'true')
+            let $channelMessages = __WEBPACK_IMPORTED_MODULE_1_jquery__(".chat-list__lines").children().not("[data-parsed='true']");
+            if (this.channelBttvEmotes)
                 this.bttvEmotes = this.globalBttvEmotes.concat(this.channelBttvEmotes);
-            if (this.channelFfzEmotes && this.localStorage.get("btd:show-ffz") == 'true')
+            if (this.channelFfzEmotes)
                 this.ffzEmotes = this.globalFfzEmotes.concat(this.channelFfzEmotes);
             this.interface.addBTTVEmotes(this.bttvEmotes);
             this.interface.addFFZEmotes(this.ffzEmotes);
             let allEmotes = this.bttvEmotes.concat(this.ffzEmotes);
             __WEBPACK_IMPORTED_MODULE_0_rxjs_es_Rx__["a" /* Observable */].interval(50)
-                .switchMap(() => __WEBPACK_IMPORTED_MODULE_1_jquery__(".chat-list__lines").children().not("[data-btd-parsed='true']"))
+                .switchMap(() => __WEBPACK_IMPORTED_MODULE_1_jquery__(".chat-list__lines").children().not("[data-parsed='true']"))
                 .map(response => __WEBPACK_IMPORTED_MODULE_1_jquery__(response))
                 .subscribe((data) => {
                 $channelMessages = data;
@@ -13773,45 +13780,22 @@ class App {
                         });
                     }
                 });
-                $channelMessages.attr("data-btd-html", $channelMessages.html()); // saves the content
-                $channelMessages.attr("data-btd-parsed", "true");
-                $channelMessages.attr("data-btd-deleted", "false");
+                $channelMessages.attr("data-parsed", "true");
             });
         });
     }
-    checkLocationChange() {
-        let lastLocation = this.localStorage.get("btd:last-href");
-        let location = window.location.pathname;
-        if (location != lastLocation) {
-            console.log("Changed page!");
-            if (location.match("channel") && !lastLocation.match("channel")) {
-                // we've just navigated to a new channel, we need to hook into the interface now
-                setTimeout(() => {
-                    this.getChannelInfo()
-                        .then(() => {
-                        this.interface.clearEmotes();
-                        this.interface.hook();
-                        if (this.channelBttvEmotes)
-                            this.bttvEmotes = this.globalBttvEmotes.concat(this.channelBttvEmotes);
-                        if (this.channelFfzEmotes)
-                            this.ffzEmotes = this.globalFfzEmotes.concat(this.channelFfzEmotes);
-                        this.interface.addBTTVEmotes(this.bttvEmotes);
-                        this.interface.addFFZEmotes(this.ffzEmotes);
-                    });
-                }, 1000);
-            }
-            this.localStorage.set("btd:last-href", location);
+    setupLocalStorage() {
+        if (this.localStorage.exists("btd:installed")) {
+            this.localStorage.set("btd:installed", true);
+            this.localStorage.set("btd:show-deleted", true);
         }
     }
-    checkDeletedMessages() {
-        let $messages = __WEBPACK_IMPORTED_MODULE_1_jquery__(".chat-line__message[data-btd-parsed='true']");
-        $messages.each(function (i) {
-            let $elem = __WEBPACK_IMPORTED_MODULE_1_jquery__(this);
-            if ($elem.children(".chat-line__message--deleted").length > 0) {
-                // message has been deleted
-                // let's restore it
-                $elem.html($messages.attr("data-btd-html"));
-                $elem.attr("data-btd-removed", "true");
+    initialize() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.grabBTTVGlobalEmotes();
+            yield this.grabFFZGlobalEmotes();
+            if (this.isHooked) {
+                yield this.getChannelInfo();
             }
         });
     }
@@ -13819,32 +13803,17 @@ class App {
         this.localStorage.set("btd:last-href", window.location.pathname);
         // This function is used to poll for location changes
         setInterval(() => {
-            this.checkLocationChange();
-            this.checkDeletedMessages();
+            let lastLocation = this.localStorage.get("btd:last-href");
+            let location = window.location.pathname;
+            if (location != lastLocation) {
+                console.log("Changed page!");
+                if (location.match("channel") && !lastLocation.match("channel")) {
+                    // we've just navigated to a new channel, we need to hook into the interface now
+                    this.interface.hook();
+                }
+                this.localStorage.set("btd:last-href", location);
+            }
         }, 100);
-    }
-    setupLocalStorage() {
-        if (!this.localStorage.exists("btd:installed")) {
-            this.localStorage.set("btd:installed", true);
-            this.localStorage.set("btd:show-deleted", true);
-            this.localStorage.set("btd:show-bttv", true);
-            this.localStorage.set("btd:show-ffz", true);
-        }
-    }
-    initialize() {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (this.localStorage.get("btd:show-bttv") == 'true') {
-                this.globalBttvEmotes = yield this.bttv.GetEmotes();
-                console.log("Global BTTV emotes: ", this.globalBttvEmotes);
-            }
-            if (this.localStorage.get("btd:show-ffz") == 'true') {
-                this.globalFfzEmotes = yield this.ffz.GetEmotes();
-                console.log("Global FFZ emotes: ", this.globalFfzEmotes);
-            }
-            if (this.isHooked) {
-                yield this.getChannelInfo();
-            }
-        });
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = App;
@@ -15983,7 +15952,6 @@ class BTTV {
                 .map((json) => {
                 let result = [];
                 let templateUrl = 'http:' + json.urlTemplate.replace(/\{\{image\}\}/, "1x");
-                //if(json !instanceof Error) {
                 json.emotes.forEach((emoticon) => {
                     result.push({
                         id: emoticon.id,
@@ -15991,14 +15959,9 @@ class BTTV {
                         url: templateUrl.replace(/\{\{id\}\}/, emoticon.id)
                     });
                 });
-                //}
                 return result;
             })
-                .toPromise()
-                .catch((e) => {
-                console.log("Error grabbing BTTV emotes: ", e);
-                return [];
-            });
+                .toPromise();
         });
     }
     getChannelEmotes(channel) {
@@ -16048,7 +16011,7 @@ class FFZ {
                 method: 'GET',
                 responseType: 'json'
             })
-                .map((e) => e.response)
+                .map(e => e.response)
                 .map((json) => {
                 let result = [];
                 for (let k in json.sets) {
@@ -16063,11 +16026,7 @@ class FFZ {
                 }
                 return result;
             })
-                .toPromise()
-                .catch((e) => {
-                console.log("Error grabbing FFZ emotes: ", e);
-                return [];
-            });
+                .toPromise();
         });
     }
 }
@@ -16089,14 +16048,12 @@ class FFZ {
 
 
 class BTDInterface {
-    constructor(_localStorage) {
+    constructor() {
         this.isEmoteMenuOpen = false;
-        this.currentTab = 0;
-        this.localStorage = _localStorage;
     }
     hook() {
         // Give dark usernames a bit of a shadow for contrast
-        __WEBPACK_IMPORTED_MODULE_1__services_util__["a" /* Util */].addCSSRule(".chat-line__message--username", {
+        __WEBPACK_IMPORTED_MODULE_1__services_util__["a" /* Util */].addCssRule(".chat-line__message--username", {
             "text-shadow": "0px 0px 2px rgb(0, 0, 0)"
         });
         this.isEmoteMenuOpen = false;
@@ -16119,40 +16076,28 @@ class BTDInterface {
         }
     }
     emoteMenu() {
-        __WEBPACK_IMPORTED_MODULE_1__services_util__["a" /* Util */].addCSS(`
-        .emote-picker .pd-b-2 {
-            padding-bottom: 0rem !important;
-        }
-
-        .emote-picker__emote {
-            width: inherit !important;
-        }
-
-        .emote-picker hr {
-            border: #5d5d5d solid 1px;
-            margin: 14px;
-        }
-
-        .btd-settings-header {
-            font-weight: bold;
-        }
-
-        .btd-settings-item {
-            width: 100%;
-            height: 30px;
-            line-height: 30px;
-            border-top: 1px ridge #0e0c13;
-            padding: 0 1.5rem !important;
-        }
-
-        div#btd-settings div.btd-settings-item:nth-of-type(2n) {
-            background-color: rgba(255, 255, 255, 0.06);
-        }
-
-        .chat-line__message[data-btd-removed='true'] {
-            color: rgba(255, 255, 255, 0.27);
-        }
-        `);
+        __WEBPACK_IMPORTED_MODULE_1__services_util__["a" /* Util */].addCssRule(".emote-picker .pd-b-2", {
+            "padding-bottom": "0rem !important"
+        });
+        __WEBPACK_IMPORTED_MODULE_1__services_util__["a" /* Util */].addCssRule(".emote-picker__emote", {
+            "width": "inherit !important"
+        });
+        __WEBPACK_IMPORTED_MODULE_1__services_util__["a" /* Util */].addCssRule(".emote-picker hr", {
+            "border": "#5d5d5d solid 1px",
+            "margin": "14px"
+        });
+        // Util.addCssRule("div#btd-bttv-emotes:before", {
+        //     "content": "BTTV EMOTES",
+        //     "display": "block",
+        //     "width": "100%",
+        //     "padding-left": "10px"
+        // });
+        // Util.addCssRule("div#btd-ffz-emotes:before", {
+        //     "content": "FFZ EMOTES",
+        //     "display": "block",
+        //     "width": "100%",
+        //     "padding-left": "10px"
+        // });
         if (__WEBPACK_IMPORTED_MODULE_0_jquery__("button[data-a-target='btd-emote-picker-button']").length == 0) {
             __WEBPACK_IMPORTED_MODULE_0_jquery__(".chat-input .tw-form__icon-group").append(__WEBPACK_IMPORTED_MODULE_0_jquery__("<button/>", {
                 "class": "tw-button-icon tw-button-icon--secondary",
@@ -16178,78 +16123,14 @@ class BTDInterface {
                 "data-a-target": "btd-emote-picker"
             })
                 .css("display", "none")
-                .append(__WEBPACK_IMPORTED_MODULE_0_jquery__("<div/>", { "id": "btd-tab-container", "class": "emote-picker__tab-content pd-1" }))
-                .append(__WEBPACK_IMPORTED_MODULE_0_jquery__("<div/>", { "class": "emote-picker__controls-container relative" })
-                .append(__WEBPACK_IMPORTED_MODULE_0_jquery__("<div/>", { "id": "btd-emote-tabs", "class": "emote-picker__tabs-container border-t" }))));
-            this.addPickerTabs();
+                .append(__WEBPACK_IMPORTED_MODULE_0_jquery__("<div/>", { "class": "emote-picker__tab-content pd-1" })
+                .append(__WEBPACK_IMPORTED_MODULE_0_jquery__("<div/>", { "class": "emote-picker__content-block emote-picker__all-tab-content relative pd-t-1 pd-b-2" })
+                .append(__WEBPACK_IMPORTED_MODULE_0_jquery__("<div/>", { "id": "btd-bttv-emotes", "class": "tw-tower justify-content-center tw-tower--gutter-none" }))
+                .append(__WEBPACK_IMPORTED_MODULE_0_jquery__("<hr/>"))
+                .append(__WEBPACK_IMPORTED_MODULE_0_jquery__("<div/>", { "id": "btd-ffz-emotes", "class": "tw-tower justify-content-center tw-tower--gutter-none" })))));
+            let $emoteContainer = __WEBPACK_IMPORTED_MODULE_0_jquery__("#btd-emotes-container");
         }
-    }
-    addPickerTabs() {
-        this.addTabs();
-        let $tabs = __WEBPACK_IMPORTED_MODULE_0_jquery__("#btd-emote-tabs");
-        $tabs
-            .empty()
-            .append(this.$newEmoteTab("Emotes"))
-            .append(this.$newEmoteTab("Settings"));
-        $tabs.children().each(() => {
-            __WEBPACK_IMPORTED_MODULE_0_jquery__(this).removeClass("emote-picker__tab--active");
-        });
-        // first tab is active
-        $tabs.attr("data-active-tab", 0);
-        $tabs.find("div").eq(0).addClass("emote-picker__tab--active");
-    }
-    $newEmoteTab(tabTitle) {
-        let newTabIndex = __WEBPACK_IMPORTED_MODULE_0_jquery__("#btd-emote-tabs").children().length;
-        return __WEBPACK_IMPORTED_MODULE_0_jquery__("<div/>", { "class": "emote-picker__tab pd-x-1" })
-            .attr("data-tab-id", newTabIndex)
-            .click(() => this.switchTabs(newTabIndex))
-            .append("<span/>")
-            .text(tabTitle);
-    }
-    switchTabs(tabIndex) {
-        __WEBPACK_IMPORTED_MODULE_0_jquery__("div.emote-picker__tab[data-tab-id=" + this.currentTab + "]").removeClass("emote-picker__tab--active");
-        __WEBPACK_IMPORTED_MODULE_0_jquery__("div.emote-picker__all-tab-content[data-tab-id=" + this.currentTab + "]").css("display", "none");
-        this.currentTab = tabIndex;
-        __WEBPACK_IMPORTED_MODULE_0_jquery__("div.emote-picker__tab[data-tab-id=" + this.currentTab + "]").addClass("emote-picker__tab--active");
-        __WEBPACK_IMPORTED_MODULE_0_jquery__("div.emote-picker__all-tab-content[data-tab-id=" + this.currentTab + "]").css("display", "inherit");
-    }
-    $newSettingsItem(title, localStorageName) {
-        let isSet = (this.localStorage.get(localStorageName) == 'true');
-        let $elem = __WEBPACK_IMPORTED_MODULE_0_jquery__("<div/>", { "class": "btd-settings-item" })
-            .append(__WEBPACK_IMPORTED_MODULE_0_jquery__("<div/>")
-            .css("float", "left")
-            .text(title))
-            .append(__WEBPACK_IMPORTED_MODULE_0_jquery__("<div/>")
-            .css("float", "right")
-            .append(__WEBPACK_IMPORTED_MODULE_0_jquery__("<button/>", { "class": "tw-button" })
-            .css("float", "right")
-            .addClass(isSet ? "tw-button--success" : "tw-button--alert")
-            .text(isSet ? "YES" : "NO")
-            .click((e) => {
-            let sVal = (this.localStorage.get(localStorageName) == 'true');
-            this.localStorage.set(localStorageName, !sVal);
-            __WEBPACK_IMPORTED_MODULE_0_jquery__(e.currentTarget).toggleClass("tw-button--success tw-button--alert");
-            __WEBPACK_IMPORTED_MODULE_0_jquery__(e.currentTarget).text(sVal ? "NO" : "YES");
-        })));
-        return $elem;
-    }
-    addTabs() {
-        let $tabs = __WEBPACK_IMPORTED_MODULE_0_jquery__("#btd-tab-container");
-        // tab 0 => emote picker
-        $tabs.append(__WEBPACK_IMPORTED_MODULE_0_jquery__("<div/>", { "class": "emote-picker__content-block emote-picker__all-tab-content relative pd-t-1 pd-b-2" })
-            .attr("data-tab-id", 0)
-            .append(__WEBPACK_IMPORTED_MODULE_0_jquery__("<div/>", { "id": "btd-bttv-emotes", "class": "tw-tower justify-content-center tw-tower--gutter-none" }))
-            .append(__WEBPACK_IMPORTED_MODULE_0_jquery__("<hr/>"))
-            .append(__WEBPACK_IMPORTED_MODULE_0_jquery__("<div/>", { "id": "btd-ffz-emotes", "class": "tw-tower justify-content-center tw-tower--gutter-none" })));
-        // tab 1 => settings menu
-        $tabs.append(__WEBPACK_IMPORTED_MODULE_0_jquery__("<div/>", { "class": "emote-picker__content-block emote-picker__all-tab-content relative pd-t-1 pd-b-2" })
-            .attr("data-tab-id", 1)
-            .append(__WEBPACK_IMPORTED_MODULE_0_jquery__("<div/>", { "id": "btd-settings", "class": "tw-tower justify-content-center tw-tower--gutter-none" })
-            .append(__WEBPACK_IMPORTED_MODULE_0_jquery__("<div/>", { "class": "btd-settings-header" })
-            .text("Better Twitch Desktop v1.0.0"))
-            .append(this.$newSettingsItem("Show Deleted Messages", "btd:show-deleted"))
-            .append(this.$newSettingsItem("Display BTTV global/channel emotes", "btd:show-bttv"))
-            .append(this.$newSettingsItem("Display FFZ global/channel emotes", "btd:show-ffz"))));
+        //$("#emote-picker__channel").insertAfter($("#emote-picker__all"))
     }
     toggleEmoteMenu() {
         this.isEmoteMenuOpen = !this.isEmoteMenuOpen;
@@ -16281,8 +16162,6 @@ class BTDInterface {
         this.addEmotes(emoteArray, false);
     }
     clearEmotes() {
-        __WEBPACK_IMPORTED_MODULE_0_jquery__("#btd-bttv-emotes").empty();
-        __WEBPACK_IMPORTED_MODULE_0_jquery__("#btd-ffz-emotes").empty();
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = BTDInterface;
@@ -16311,25 +16190,7 @@ class LocalStorage {
         return window.localStorage[key] != undefined;
     }
 }
-/* unused harmony export LocalStorage */
-
-class CookieStorage {
-    get(key) {
-        let a = `; ${document.cookie}`.match(`;\\s*${key}=([^;]+)`);
-        return a ? a[1] : '';
-    }
-    set(key, value) {
-        document.cookie = `${key}=${value};  expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
-    }
-    delete(key) {
-        document.cookie = `${key}=;  expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-    }
-    exists(key) {
-        let a = `; ${document.cookie}`.match(`;\\s*${key}=([^;]+)`);
-        return a ? true : false;
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = CookieStorage;
+/* harmony export (immutable) */ __webpack_exports__["a"] = LocalStorage;
 
 
 

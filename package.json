@@ -1,6 +1,6 @@
 {
   "name": "better-twitch-desktop",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "More features for the Twitch Desktop client (such as BTTV and FFZ emotes)",
   "main": "server.js",
   "scripts": {
