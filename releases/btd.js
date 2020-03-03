@@ -13729,7 +13729,7 @@ class App {
     }
     getChannelInfo() {
         return __awaiter(this, void 0, void 0, function* () {
-            let $elem = __WEBPACK_IMPORTED_MODULE_1_jquery__("p[data-a-target='chat__header-channel-name']");
+            let $elem = __WEBPACK_IMPORTED_MODULE_1_jquery__("p[data-a-target='user-channel-header-item']");
             this.channelName = $elem.text();
             console.log("> Viewing channel: " + this.channelName);
             if (this.localStorage.get("btd:show-bttv") == 'true') {
